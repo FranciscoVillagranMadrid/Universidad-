@@ -36,8 +36,7 @@ class FiltroStopwords:
                 terminos.insertar(palabra)
 
     def filtrar_texto(self, texto):
-        # Recorre caracter a caracter para que signos como coma o punto
-        # separen palabras, en vez de pegarlas.
+        # Se arma palabra por palabra. Los signos cortan la palabra.
         terminos = ListaTerminos()
         palabra = ""
         i = 0
@@ -79,42 +78,6 @@ class IndiceInvertidoPosts:
         if termino in self.vocabulario:
             return self.vocabulario[termino]
         return None
-
-    def buscar_varios(self, texto):
-        # Búsqueda simple AND: un post debe aparecer en todos los términos.
-        palabras = texto.split()
-        resultado = ListaPosts()
-        primera_lista = None
-        cantidad_terminos = 0
-
-        i = 0
-        while i < len(palabras):
-            termino = palabras[i].lower().strip()
-            lista = self.buscar(termino)
-            if lista is not None:
-                cantidad_terminos = cantidad_terminos + 1
-                if primera_lista is None or lista.contar() < primera_lista.contar():
-                    primera_lista = lista
-            i = i + 1
-
-        if primera_lista is None:
-            return resultado
-
-        actual = primera_lista.cabeza
-        while actual is not None:
-            post = actual.post
-            aparece_en_todos = True
-            j = 0
-            while j < len(palabras):
-                termino = palabras[j].lower().strip()
-                lista = self.buscar(termino)
-                if lista is not None and not lista.contiene_id(post.post_id):
-                    aparece_en_todos = False
-                j = j + 1
-            if aparece_en_todos and cantidad_terminos > 0:
-                resultado.insertar(post)
-            actual = actual.siguiente
-        return resultado
 
     def total_terminos(self):
         return len(self.vocabulario)

@@ -52,16 +52,10 @@ def numero(texto):
     texto = texto.strip()
     if texto == "":
         return 0
-    signo = 1
-    i = 0
-    if texto[0] == "-":
-        signo = -1
-        i = 1
-    valor = 0
-    while i < len(texto) and texto[i].isdigit():
-        valor = valor * 10 + ord(texto[i]) - 48
-        i = i + 1
-    return valor * signo
+    try:
+        return int(texto)
+    except ValueError:
+        return 0
 
 
 def indice_columna(encabezado, opciones):
@@ -130,7 +124,6 @@ def preprocesar():
     idx_body = indice_columna(encabezado, ["body", "text"])
     idx_score = indice_columna(encabezado, ["score", "ups", "like_count"])
     idx_parent = indice_columna(encabezado, ["parent_id"])
-    idx_link = indice_columna(encabezado, ["link_id"])
     idx_subreddit = indice_columna(encabezado, ["subreddit"])
 
     if idx_author == -1 or idx_id == -1:
@@ -141,7 +134,6 @@ def preprocesar():
     usuarios = {}
     posts = []
     id_a_autor = {}
-    id_a_post = {}
     ultimo_autor_por_subreddit = {}
     relaciones = {}
     posts_por_usuario = {}
@@ -157,7 +149,6 @@ def preprocesar():
         body = obtener(campos, idx_body)
         score = numero(obtener(campos, idx_score))
         parent_id = obtener(campos, idx_parent)
-        link_id = obtener(campos, idx_link)
         subreddit = obtener(campos, idx_subreddit)
 
         if autor != "" and autor != "[deleted]" and post_id != "":
@@ -171,7 +162,6 @@ def preprocesar():
                         texto = texto[:350]
                     posts.append((post_id, autor, texto, score))
                     id_a_autor[post_id] = autor
-                    id_a_post[post_id] = True
                     posts_por_usuario[autor] = posts_por_usuario[autor] + 1
 
                     if autor not in usuarios:

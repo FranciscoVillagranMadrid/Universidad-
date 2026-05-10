@@ -62,16 +62,10 @@ class SistemaRedSocial:
         texto = texto.strip()
         if texto == "":
             return 0
-        signo = 1
-        i = 0
-        if texto[0] == "-":
-            signo = -1
-            i = 1
-        valor = 0
-        while i < len(texto) and texto[i].isdigit():
-            valor = valor * 10 + ord(texto[i]) - 48
-            i = i + 1
-        return valor * signo
+        try:
+            return int(texto)
+        except ValueError:
+            return 0
 
     def cargar_stopwords(self, ruta):
         archivo = open(ruta, "r", encoding="utf-8")
