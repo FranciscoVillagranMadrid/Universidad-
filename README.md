@@ -2,26 +2,20 @@
 
 Proyecto semestral de la asignatura **Estructuras de Datos**.
 
-El trabajo consiste en modelar una red social en memoria, cargando usuarios, publicaciones y relaciones entre usuarios. A partir de esos datos se construyen índices invertidos para realizar búsquedas de publicaciones por términos y búsquedas de contactos por usuario.
+Este proyecto implementa un sistema simple de red social usando datos de Reddit. La idea principal es cargar usuarios, publicaciones y relaciones entre usuarios para luego permitir búsquedas usando un índice invertido.
 
-El proyecto fue desarrollado en **Python**, usando clases, nodos y listas enlazadas propias, de acuerdo con los contenidos vistos en la asignatura.
-
----
+El sistema trabaja todo en memoria y utiliza listas enlazadas implementadas manualmente para guardar los resultados asociados a cada índice.
 
 ## Dataset utilizado
 
-El dataset usado corresponde a datos de Reddit obtenidos desde Kaggle:
+El dataset usado es:
 
 **The Pushshift Reddit Dataset - CSV**  
 https://www.kaggle.com/datasets/jaymetosineto/the-pushshift-reddit-dataset-csv
 
-Reddit se utilizó como red social base porque contiene usuarios, publicaciones, comentarios y métricas de interacción. Como Reddit no maneja una lista de amigos explícita como otras redes sociales, las relaciones entre usuarios se modelaron a partir de interacciones o co-participación dentro de la plataforma.
+Este dataset contiene información basada en Reddit, como publicaciones, comentarios, usuarios y datos de interacción. Para este proyecto los datos fueron preprocesados y convertidos a archivos más simples para facilitar la carga desde Python.
 
-Para trabajar de forma más simple con los datos, se generaron archivos CSV finales con la información necesaria para el sistema.
-
----
-
-## Archivos del proyecto
+## Archivos principales
 
 ```text
 red_social.py
@@ -32,133 +26,39 @@ usuarios.csv
 posts.csv
 relaciones.csv
 stopwords.txt
-README.md
 ```
 
-### `red_social.py`
+## Descripción general
 
-Archivo principal del programa. Se encarga de cargar los datos, crear los usuarios y posts, cargar relaciones, construir los índices y ejecutar pruebas básicas.
+El proyecto carga la información desde archivos CSV y construye dos tipos de índices:
 
-### `listas.py`
+- Un índice invertido de publicaciones, donde cada término apunta a una lista de posts que contienen esa palabra.
+- Un índice de usuarios, donde cada usuario apunta a una lista de contactos relacionados.
 
-Contiene las listas enlazadas implementadas manualmente. Estas listas se usan para guardar términos, posts, usuarios/contactos y likes.
-
-### `indices.py`
-
-Contiene el filtro de stopwords y los índices invertidos del sistema:
-
-- índice de posts;
-- índice de usuarios/contactos.
-
-### `preprocesar_reddit.py`
-
-Archivo usado para preparar los datos del dataset original y generar archivos más simples para el proyecto.
-
-### Archivos CSV
-
-- `usuarios.csv`: usuarios cargados en el sistema.
-- `posts.csv`: publicaciones o comentarios usados como posts.
-- `relaciones.csv`: relaciones entre usuarios.
-- `stopwords.txt`: palabras que se ignoran al construir el índice.
-
----
-
-## Adaptación del dataset
-
-La pauta pide trabajar con usuarios, posts, likes, contactos e índices invertidos. En el proyecto se usó la siguiente adaptación:
-
-| Elemento solicitado | Representación usada |
-|---|---|
-| Usuario | Usuario de Reddit |
-| Post | Publicación o comentario |
-| Texto del post | Texto asociado al post/comentario |
-| Likes | Score del post |
-| Contactos | Interacciones o co-participación entre usuarios |
-| Índice de posts | Término → lista enlazada de posts |
-| Índice de usuarios | Usuario → lista enlazada de contactos |
-
-Esta adaptación se hizo porque el dataset no entrega todos los datos exactamente en el mismo formato de la pauta, pero sí permite representar una red social de manera coherente.
-
----
+Como Reddit no maneja una lista de amigos explícita como otras redes sociales, las relaciones entre usuarios se modelan a partir de interacciones o participación dentro del mismo contexto.
 
 ## Cómo ejecutar
 
-Para ejecutar el proyecto:
+Para correr el proyecto, se debe ejecutar:
 
 ```bash
 python red_social.py
 ```
 
-Los archivos `.csv` y `stopwords.txt` deben estar en la misma carpeta que los archivos `.py`.
+Los archivos CSV y `stopwords.txt` deben estar en la misma carpeta que el código.
 
-Al ejecutar, el programa muestra una prueba básica con la cantidad de usuarios, posts, relaciones, stopwords y términos indexados. También muestra ejemplos de búsqueda de posts y contactos.
+## Funcionamiento básico
 
----
+Al ejecutar el programa, se cargan:
 
-## Estructuras utilizadas
+- usuarios;
+- publicaciones;
+- relaciones entre usuarios;
+- stopwords;
+- índices de búsqueda.
 
-El proyecto utiliza listas enlazadas propias para almacenar los datos asociados a los índices.
+Luego se muestran pruebas simples, como buscar publicaciones por una palabra y consultar los contactos de un usuario.
 
-Los diccionarios se utilizan como mapas principales para acceder rápido a usuarios, posts y entradas del índice. Cada entrada del índice apunta a una lista enlazada implementada manualmente.
+## Nota sobre el dataset
 
-Ejemplo general del índice de posts:
-
-```text
-python -> Post 1 -> Post 2 -> Post 3
-```
-
-Ejemplo general del índice de usuarios:
-
-```text
-usuario1 -> usuario2 -> usuario3 -> usuario4
-```
-
----
-
-## Funcionamiento general
-
-El flujo principal del sistema es:
-
-1. Cargar stopwords.
-2. Cargar usuarios.
-3. Cargar posts.
-4. Cargar relaciones entre usuarios.
-5. Construir el índice invertido de posts.
-6. Construir el índice invertido de usuarios.
-7. Realizar búsquedas.
-
-Este orden permite que los posts tengan autores válidos y que las relaciones se creen solo entre usuarios existentes.
-
----
-
-## División del trabajo
-
-El proyecto se organizó en tres partes principales:
-
-### Persona 1: Carga de datos y sistema principal
-
-Encargada de la carga de archivos, creación de usuarios y posts, carga de relaciones y ejecución del sistema.
-
-### Persona 2: Listas enlazadas
-
-Encargada de implementar los nodos y listas enlazadas usadas en el proyecto.
-
-### Persona 3: Índices y filtros
-
-Encargada de implementar el índice invertido de posts, el índice de usuarios/contactos y el filtro de stopwords.
-
----
-
-## Consideraciones
-
-- Reddit no tiene amigos explícitos, por lo que los contactos se modelaron como interacciones.
-- El score del dataset se usa como base para representar likes.
-- Los archivos incluidos permiten probar el funcionamiento del sistema.
-- Si se desea trabajar con más datos, se puede usar el preprocesador sobre el dataset original.
-- El proyecto evita librerías externas y mantiene la lógica principal con estructuras implementadas manualmente.
-
----
-
-## Conclusión
-
-El sistema permite representar una red social en memoria usando estructuras de datos lineales e índices invertidos. La implementación permite buscar publicaciones por términos y consultar contactos de usuarios, manteniendo el uso de listas enlazadas propias como parte central del trabajo.
+Los archivos CSV incluidos son una versión simplificada para probar el funcionamiento del programa. Si se quiere trabajar con más datos, se puede usar el archivo `preprocesar_reddit.py` para generar nuevos CSV a partir del dataset original descargado desde Kaggle.
