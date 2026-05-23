@@ -125,36 +125,54 @@ class SistemaRedSocial:
             linea = archivo.readline() #lee la siguiente linea del archivo
         archivo.close() #cierra el archivo
 
-    #funcion que lee el archivo de relaciones entre usuarios 
-    #reddit no usa amigos como tal, por eso se interpretan como contactos segun sus interacciones
+    #funcion que lee el archivo de relaciones entre usuarios
+    #como la pauta habla de amigos/contactos, las relaciones se guardan en ambos sentidos
+    #reddit no usa amigos como tal, pero aqui las interacciones se adaptan como contactos mutuos
     def cargar_relaciones(self, ruta):
-        archivo = open(ruta, "r", encoding="utf-8") #abre el archivo en codificacion utf-8 para su lectura (como texto)
-        archivo.readline() #lee la primera linea del archivo (no importa guardarla ya que es el encabezado)
+        archivo = open(ruta, "r", encoding="utf-8") #abre el archivo en codificacion utf-8 para su lectura
+        archivo.readline() #lee la primera linea del archivo, no se guarda porque es el encabezado
         linea = archivo.readline() #lee la primera linea de datos de las relaciones
+
         while linea != "": #mientras no llegue al final del archivo sigue el ciclo
             linea = linea.strip() #borra los espacios en blanco de cada linea
-            if linea != "": #si la linea no esta vacia 
-                partes = linea.split(SEPARADOR) #crea partes con el separador 
-                if len(partes) >= 2: #si hay 2 partes o más en una linea almacena
+
+            if linea != "": #si la linea no esta vacia
+                partes = linea.split(SEPARADOR) #crea partes usando el separador
+
+                if len(partes) >= 2: #si hay 2 partes o mas, puede obtener origen y contacto
                     origen = partes[0].strip() #parte 1 para el usuario origen
                     contacto = partes[1].strip() #parte 2 para el usuario contacto
+
                     if origen != "" and contacto != "" and origen != contacto: #si origen y contacto tienen datos y no son el mismo usuario
-                        if origen not in self.usuarios: #si el usuario origen no está registrado en el diccionario de usuarios
-                            self.usuarios[origen] = Usuario("unknown_"+origen, origen, 0) #crea un usuario temporal porque no venia en usuarios.csv
+                        if origen not in self.usuarios: #si el usuario origen no esta registrado en el diccionario de usuarios
+                            self.usuarios[origen] = Usuario("unknown_" + origen, origen, 0) #crea un usuario temporal porque no venia en usuarios.csv
                             self.indice_usuarios.registrar_usuario(origen) #registra el usuario en el indice invertido
-                        if contacto not in self.usuarios: #si el usuario contacto no está registrado en el diccionario de usuarios
-                            self.usuarios[contacto] = Usuario("unknown_"+contacto, contacto, 0) #crea un usuario temporal porque no venia en usuarios.csv
+
+                        if contacto not in self.usuarios: #si el usuario contacto no esta registrado en el diccionario de usuarios
+                            self.usuarios[contacto] = Usuario("unknown_" + contacto, contacto, 0) #crea un usuario temporal porque no venia en usuarios.csv
                             self.indice_usuarios.registrar_usuario(contacto) #registra el usuario en el indice invertido
 
-                        antes = self.usuarios[origen].contactos.contar() #cuenta cuantos contactos tenia el usuario antes de insertar
+                        #agrega la relacion desde origen hacia contacto
+                        antes = self.usuarios[origen].contactos.contar() #cuenta cuantos contactos tenia el origen antes de insertar
                         self.usuarios[origen].contactos.insertar(contacto) #agrega el contacto a la lista enlazada del usuario origen
                         self.indice_usuarios.agregar_contacto(origen, contacto) #agrega la relacion al indice invertido de usuarios
                         despues = self.usuarios[origen].contactos.contar() #cuenta cuantos contactos tiene despues de insertar
-                        if despues > antes:
-                            self.total_relaciones = self.total_relaciones + 1 #aumenta el total de relaciones cargadas si se agrego una nueva
-            linea = archivo.readline() #lee la siguiente linea del archivo
-        archivo.close() #cierra el archivo
 
+                        if despues > antes: #si la cantidad aumento significa que se agrego una relacion nueva
+                            self.total_relaciones = self.total_relaciones + 1 #aumenta el total de relaciones cargadas
+
+                        #agrega la relacion inversa desde contacto hacia origen
+                        antes = self.usuarios[contacto].contactos.contar() #cuenta cuantos contactos tenia el contacto antes de insertar
+                        self.usuarios[contacto].contactos.insertar(origen) #agrega el origen como contacto del otro usuario
+                        self.indice_usuarios.agregar_contacto(contacto, origen) #agrega la relacion inversa al indice invertido de usuarios
+                        despues = self.usuarios[contacto].contactos.contar() #cuenta cuantos contactos tiene despues de insertar
+
+                        if despues > antes: #si la cantidad aumento significa que se agrego la relacion inversa
+                            self.total_relaciones = self.total_relaciones + 1 #aumenta el total de relaciones cargadas
+
+            linea = archivo.readline() #lee la siguiente linea del archivo
+
+        archivo.close() #cierra el archivo
     #funcion que construye el indice invertido de los post
     def construir_indices(self):
         self.indice_posts.construir(self.posts, self.filtro) #construye el indice usando los posts guardados y el filtro de stopwords

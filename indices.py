@@ -44,7 +44,7 @@ class FiltroStopwords:
     def agregar_termino_si_valido(self, terminos, palabra):
         palabra = self.limpiar_palabra(palabra) #usa la funcion de limpiar la palabra primero
         
-        if palabra != "" and len(palabra) > 2 and not palabra.isdigit(): #si la palabra existe, es mayor a 2 en su largo y no es un número sigue
+        if palabra != "" and len(palabra) > 2 and not palabra.isdigit(): #si la palabra existe, es mayor a 2 en su largo y no es un número sigue 
             
             if not self.es_stopword(palabra): #si no sale en el diccionario de las stopwords sigue 
                 terminos.insertar(palabra) #inserta la palabra en la lista de terminos
