@@ -222,58 +222,115 @@ def mostrar_contactos(contactos, maximo):
         print("-", contactos[i]) #muestra en pantalla los contactos
         i = i + 1 #avanza al siguiente contacto
 
+#funcion que muestra algunos posts cargados en el sistema
+#esto sirve para comprobar que los posts si estan cargados aunque se busquen por terminos
+def mostrar_posts_cargados(sistema, maximo):
+    if len(sistema.posts) == 0: #si no hay posts cargados no muestra nada
+        print("No hay posts cargados.")
+        return
+
+    print("\nAlgunos posts cargados:")
+    contador = 0 #contador para no mostrar demasiados posts en pantalla
+
+    for post_id in sistema.posts: #recorre los posts guardados en el diccionario
+        if contador >= maximo: #si ya mostro el maximo se detiene
+            break
+
+        print("-", sistema.posts[post_id]) #muestra el post usando el __repr__ de la clase Post
+        contador = contador + 1 #aumenta el contador para seguir con el siguiente post
+
+
 #funcion main que llama a todo el proyecto
 def main():
     sistema = SistemaRedSocial() #sistema es la red social completa
-    sistema.cargar_stopwords("stopwords.txt") #carga los stopwords desde el archivo txt
-    sistema.cargar_usuarios("usuarios.csv") #carga los usuarios del archivo csv
-    sistema.cargar_posts("posts.csv") #carga los posts del archivo csv
-    sistema.cargar_relaciones("relaciones.csv") #carga las relaciones del archivo csv
+
+    #carga todos los archivos necesarios para armar la red social
+    sistema.cargar_stopwords("stopwords.txt") #carga las stopwords desde el txt
+    sistema.cargar_usuarios("usuarios.csv") #carga los usuarios desde el csv
+    sistema.cargar_posts("posts.csv") #carga los posts desde el csv
+    sistema.cargar_relaciones("relaciones.csv") #carga las relaciones entre usuarios
     sistema.construir_indices() #construye el indice invertido de los posts
 
-    print("\nResumen de carga")
-    sistema.mostrar_resumen() #muestra el resumen de los datos cargados e indexados con la funcion creada 
+    print("\nResumen de carga inicial")
+    sistema.mostrar_resumen() #muestra el resumen inicial para comprobar que todo se cargo bien
 
-    #primero se busca un termino en el indice invertido de posts
-    while True:
-        print("\nBusqueda de posts por termino")
-        termino = input("Ingrese un termino o escriba TERMINOS para ver el indice de posts: ") #el usuario ingresa el termino o pide ver la lista de terminos
+    opcion = "" #guarda la opcion que ingresa el usuario
 
-        if termino.upper() == "TERMINOS": #si escribe TERMINOS muestra los terminos del indice de posts
-            print("\nTerminos del indice invertido de posts:")
-            for termino_indice in sistema.indice_posts.vocabulario: #recorre los terminos guardados en el indice invertido de posts
-                print("-", termino_indice) #muestra el termino
-            continue #vuelve a pedir un termino despues de mostrar la lista
+    while opcion != "5": #mientras la opcion no sea salir, el menu sigue funcionando
+        print("\n===== RED SOCIAL - INDICE INVERTIDO =====")
+        print("1. Buscar posts por termino / palabra clave")
+        print("2. Buscar usuario y mostrar contactos")
+        print("3. Mostrar algunos posts cargados")
+        print("4. Mostrar resumen de carga")
+        print("5. Salir")
 
-        posts = sistema.buscar_posts(termino) #busca posts asociados al termino ingresado
+        opcion = input("Seleccione una opcion: ").strip() #lee la opcion elegida por el usuario
 
-        if len(posts) == 0: #si no existen posts asociados al termino
-            print("No existen posts asociados al termino:", termino)
-            return #termina el programa si no hay resultados
+        if opcion == "1":
+            #busca posts usando el indice invertido de terminos
+            termino = input("Ingrese un termino o escriba TERMINOS para ver el indice de posts: ").strip()
 
-        mostrar_posts(posts, 5) #muestra los posts encontrados hasta un maximo indicado
-        break #sale del ciclo si encontro posts y avanza a la busqueda de usuarios
+            if termino.upper() == "TERMINOS": #si el usuario escribe TERMINOS se muestran algunos terminos del indice
+                print("\nTerminos del indice invertido de posts:")
+                contador = 0 #contador para no llenar la pantalla con todos los terminos
 
-    #despues se busca un usuario en el indice invertido de usuarios
-    while True:
-        print("\nBusqueda de contactos por usuario")
-        usuario = input("Ingrese un username o escriba USUARIOS para ver el indice de usuarios: ") #el usuario ingresa un username o pide ver la lista de usuarios
+                for termino_indice in sistema.indice_posts.vocabulario: #recorre los terminos guardados en el indice
+                    print("-", termino_indice) #muestra el termino
+                    contador = contador + 1 #aumenta el contador
 
-        if usuario.upper() == "USUARIOS": #si escribe USUARIOS muestra los usuarios del indice de usuarios
-            print("\nUsuarios del indice invertido de usuarios:")
-            for username in sistema.indice_usuarios.mapa: #recorre los usuarios guardados en el indice invertido de usuarios
-                print("-", username) #muestra el usuario
-            continue #vuelve a pedir un usuario despues de mostrar la lista
+                    if contador >= 30: #muestra solo algunos terminos para que no sea tan largo
+                        print("... se muestran solo algunos terminos.")
+                        break
 
-        contactos = sistema.buscar_contactos(usuario) #busca los contactos asociados al usuario ingresado
+            else:
+                posts = sistema.buscar_posts(termino) #busca los posts relacionados al termino ingresado
 
-        if len(contactos) == 0: #si el usuario no tiene contactos registrados
-            print("No se encontraron contactos para el usuario:", usuario)
-            return #termina el programa si no hay contactos
+                if len(posts) == 0: #si no encuentra posts no termina el programa, solo avisa
+                    print("No existen posts asociados al termino:", termino)
+                else:
+                    print("\nPosts encontrados para el termino:", termino)
+                    mostrar_posts(posts, 5) #muestra hasta 5 posts encontrados
 
-        print("\nContactos del usuario:", usuario) #muestra el usuario al que pertenecen los contactos
-        mostrar_contactos(contactos, 8) #muestra los contactos encontrados hasta un maximo indicado
-        break #termina el ciclo si encontro contactos
+        elif opcion == "2":
+            #busca los contactos asociados a un usuario usando el indice de usuarios
+            usuario = input("Ingrese un username o escriba USUARIOS para ver el indice de usuarios: ").strip()
+
+            if usuario.upper() == "USUARIOS": #si escribe USUARIOS muestra algunos usuarios cargados en el indice
+                print("\nUsuarios del indice invertido de usuarios:")
+                contador = 0 #contador para no mostrar demasiados usuarios
+
+                for username in sistema.indice_usuarios.mapa: #recorre los usuarios guardados en el indice
+                    print("-", username) #muestra el username
+                    contador = contador + 1 #aumenta el contador
+
+                    if contador >= 30: #limita la muestra para que no se llene la pantalla
+                        print("... se muestran solo algunos usuarios.")
+                        break
+
+            else:
+                contactos = sistema.buscar_contactos(usuario) #busca los contactos del usuario ingresado
+
+                if len(contactos) == 0: #si no encuentra contactos no termina el programa, solo avisa
+                    print("No se encontraron contactos para el usuario:", usuario)
+                else:
+                    print("\nContactos del usuario:", usuario)
+                    mostrar_contactos(contactos, 8) #muestra hasta 8 contactos encontrados
+
+        elif opcion == "3":
+            #muestra algunos posts para demostrar que los posts estan cargados en memoria
+            mostrar_posts_cargados(sistema, 8)
+
+        elif opcion == "4":
+            #muestra las cantidades cargadas y los terminos indexados
+            print("\nResumen de carga")
+            sistema.mostrar_resumen()
+
+        elif opcion == "5":
+            print("Programa finalizado.")
+
+        else:
+            print("Opcion no valida. Intente nuevamente.")
+
 
 #funcion para ejecutar el main 
 if __name__ == "__main__":
